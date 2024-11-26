@@ -1,0 +1,260 @@
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="(leaveApplicationList$ |async) as appliedLeave">
+    <ion-item>
+      <div class="full-width">
+        <ion-grid>
+          <div *ngFor="let leave of appliedLeave" class="attendance-table">
+
+            <ion-row>
+              <ion-col>Applied Date</ion-col>
+              <ion-col><b><span>{{leave.apply_date | date:'MMM d'}}</span></b></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Employee</ion-col>
+              <ion-col><b><span>{{leave.employee_name }}</span></b></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Leave Type </ion-col>
+              <ion-col><b>{{leave.leave}}</b></ion-col>
+            </ion-row>
+
+            <ion-row *ngIf="leave.purpose && leave.purpose!=='null' ">
+              <ion-col>Purpose</ion-col>
+              <ion-col>{{resizeLeaveContent(leave.purpose)}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Date</ion-col>
+              <ion-col>
+                <b><span>{{leave.start_date | date:'d MMM, yy'}}</span></b> &nbsp;
+                <span *ngIf="leave.start_date !== leave.end_date"> to <b>{{leave.end_date | date:'d MMM,
+                    yy'}}</b></span>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Duration</ion-col>
+              <ion-col>
+                {{leave.duration}}
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Status </ion-col>
+              <ion-col><span>{{leave.leave_status_name}}</span></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Waiting Status</ion-col>
+              <ion-col><span>{{leave.waiting_for}}</span></ion-col>
+
+            </ion-row>
+            <ion-row>
+              <ion-button *ngIf="leave.waiting_status_id === 3 && leave.is_action" color="tertiary"
+                (click)="viewApplicationDetails($event,leave)"><ion-icon name="checkmark-done"></ion-icon>
+                &nbsp;Acknowledge</ion-button>
+              <ion-button *ngIf="leave.waiting_status_id === 4 && leave.is_action" color="tertiary"
+                (click)="viewApplicationDetails($event,leave)"><ion-icon name="checkmark-done"></ion-icon>
+                &nbsp;Recommend</ion-button>
+              <ion-button *ngIf="(leave.waiting_status_id === 5 || leave.waiting_status_id === 6) && leave.is_action"
+                color="tertiary" (click)="viewApplicationDetails($event,leave)"><ion-icon
+                  name="checkmark-done"></ion-icon> &nbsp;Approve</ion-button>
+              <ion-button *ngIf="leave.waiting_status_id === 0" color="medium"
+                (click)="viewApplicationDetails($event,leave)"><ion-icon name="eye"></ion-icon>&nbsp;View</ion-button>
+              <ion-button *ngIf="leave.waiting_status_id === 5 && leave.is_action" color="danger"
+                (click)="viewApplicationDetails($event,leave)"><ion-icon
+                  name="trash"></ion-icon>&nbsp;Reject</ion-button>
+              <ion-button *ngIf="leave.waiting_status_id === 7 && leave.is_action" color="danger"
+                (click)="viewApplicationDetails($event,leave)"><ion-icon
+                  name="close"></ion-icon>&nbsp;Cancel</ion-button>
+            </ion-row>
+          </div>
+        </ion-grid>
+      </div>
+    </ion-item>
+
+  </div>
+
+
+</ion-content>
+
+
+<ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast" positionAnchor="header"
+  message="Hello World!" [duration]="5000" (didDismiss)="setOpen(false)"></ion-toast>
+
+
+<ion-modal [isOpen]="isActionDisplay">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{actionHeader}}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="isActionDisplay=false" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <form action="" [formGroup]="LeaveApprovalForm">
+        <ion-list>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Employee </ion-label>
+              <ion-input placeholder="" formControlName="employee_name" [readonly]="true"></ion-input>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Leave </ion-label>
+              <ion-input placeholder="" formControlName="leave" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_hourly"
+                  [disabled]="true">Hourly Leave</ion-checkbox>
+              </div>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_half_day"
+                  [disabled]="true">Half Day</ion-checkbox>
+              </div>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Start Date </ion-label>
+              <ion-input placeholder="" formControlName="start_date" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> End Date </ion-label>
+              <ion-input placeholder="" formControlName="end_date" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Leave Duration </ion-label>
+              <div class="d-justify">
+                <ion-input placeholder="" formControlName="duration_days" [readonly]="true"></ion-input>
+                <span style="padding-top: 8px;">Days or</span>
+                <ion-input placeholder="" formControlName="duration_min" [readonly]="true"></ion-input>
+                <span style="padding-top: 8px;">Hours</span>
+              </div>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownAreaRequired">
+            <div class="form-group">
+              <ion-label class="ion-label"> Leave Enjoyable Area </ion-label>
+              <ion-input placeholder="" formControlName="enjoyable_area" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownAcknowledgeBy">
+            <div class="form-group">
+              <ion-label class="ion-label"> Acknowledge By </ion-label>
+              <ion-input placeholder="" formControlName="responsible_employee_name" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownRecommendBy">
+            <div class="form-group">
+              <ion-label class="ion-label"> Recommended By </ion-label>
+              <ion-input placeholder="" formControlName="recommend_employee_name" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownApproveBy">
+            <div class="form-group">
+              <ion-label class="ion-label"> Approved By </ion-label>
+              <ion-input placeholder="" formControlName="approve_employee_name" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownRequiredPurpose">
+            <div class="form-group">
+              <ion-label class="ion-label"> Purpose </ion-label>
+              <ion-textarea placeholder="" formControlName="purpose" [readonly]="true"></ion-textarea>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownAcknowledgeNote">
+            <div class="form-group">
+              <ion-label class="ion-label"> Acknowledger Responsibility </ion-label>
+              <ion-textarea placeholder="" formControlName="responsibile_employee_responsibility"
+                [readonly]="true"></ion-textarea>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownAcknowledgeNote">
+            <div class="form-group">
+              <ion-label class="ion-label"> Acknowledge Note </ion-label>
+              <ion-textarea placeholder="" formControlName="responsible_note"></ion-textarea>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownRecommendNote">
+            <div class="form-group">
+              <ion-label class="ion-label"> Recommendation Note </ion-label>
+              <ion-textarea placeholder="" formControlName="recommend_note"></ion-textarea>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownApproveNote">
+            <div class="form-group">
+              <ion-label class="ion-label">Approval/Reject Note </ion-label>
+              <ion-textarea placeholder="" formControlName="approve_note"></ion-textarea>
+            </div>
+            <div *ngIf="submitted && isShownApproveNote && LeaveApprovalForm.controls['approve_note'].errors"
+              class="invalid-feedback">
+              <small>Approve/Reject note is required</small>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownCancelNote">
+            <div class="form-group">
+              <ion-label class="ion-label">Cancel Note </ion-label>
+              <ion-textarea placeholder="" formControlName="cancel_note"></ion-textarea>
+            </div>
+            <div *ngIf="submitted && isShownCancelNote && LeaveApprovalForm.controls['approve_note'].errors"
+              class="invalid-feedback">
+              <small>Cancel note is required</small>
+            </div>
+          </ion-item>
+          <ion-item>
+
+            <ion-button *ngIf="isShownAcknowledgeButton" color="tertiary" (click)="leaveAcknowledge()"><ion-icon
+                name="checkmark-done"></ion-icon> &nbsp;Acknowledge</ion-button>
+            <ion-button *ngIf="isShownRecommendButton" color="tertiary" (click)="leaveRecommend()"><ion-icon
+                name="checkmark-done"></ion-icon> &nbsp;Recommend</ion-button>
+            <ion-button *ngIf="isShownApproveButton && !isOnlyReject" color="tertiary"
+              (click)="leaveApprove()"><ion-icon name="checkmark-done"></ion-icon> &nbsp;Approve</ion-button>
+            <ion-button *ngIf="isOnlyReject" color="danger" (click)="leaveReject()"><ion-icon
+                name="trash"></ion-icon>&nbsp;Reject</ion-button>
+            <ion-button *ngIf="isShownCancelButton" color="danger" (click)="leaveCancel()"><ion-icon
+                name="close"></ion-icon>&nbsp;Cancel</ion-button>
+          </ion-item>
+        </ion-list>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+<!-- <form action="" [formGroup]="LeaveApprovalForm">
+
+    <div class="col-12">
+      <div class="p-fluid p-formgrid grid md:pl-5 md:pr-5">
+
+
+      </div>
+      <div class="flex justify-content-end md:pl-5 md:pr-5 md:pt-4">
+
+
+
+
+        <button *ngIf="isShownCancelButton" pButton pRipple type="button" (click)="leaveCancel()" label="Cancel"
+          class="risBtn risSave mr-2 mb-2" icon="pi pi-check"></button>
+        <button pButton pRipple type="button" (click)="toggleFormClose()" label="Close" class="risBtn risClose mr-2 mb-2"
+          icon="pi pi-times"></button>
+      </div>
+    </div>
+
+
+  </form> -->

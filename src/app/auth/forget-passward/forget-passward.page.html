@@ -1,0 +1,56 @@
+<ion-card>
+  <img src="/.../../../../assets/images/logo.svg">
+  <ion-card-content>
+    <form [formGroup]="forgotForm" *ngIf="!showCodeSection">
+    <div class="header-text">
+      <h1>Forget Password</h1>
+    </div>
+
+    <div class="form-group" >
+      <ion-label >Email address</ion-label>
+      <div class="input-group">
+        <ion-icon name="mail-outline" slot="end" class="icon-input"></ion-icon>
+        <input placeholder="Enter your email address" required="true" type="email" formControlName="email">
+
+      </div>
+      <div *ngIf="submitted &&forgotForm.get('email')?.errors" class="invalid-feedback">
+        <small class="p-error">Email is required</small>
+      </div>
+    </div>
+
+    <ion-button (click)="forgotPassword()"><ion-icon name="checkbox-outline"></ion-icon>&nbsp;Submit</ion-button>
+
+
+  </form>
+
+  <form [formGroup]="verificationForm" *ngIf="showCodeSection">
+    <div class="header-text">
+      <h1>Varification Code</h1>
+    </div>
+    <ion-row>
+      <ion-col *ngFor="let digit of digits; let i = index" class="varify-code m-r-l-4">
+        <ion-input
+          formControlName="{{ 'digit' + i }}"
+          type="text"
+          maxlength="1"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          (ionInput)="onDigitInput($event, i)"
+        ></ion-input>
+      </ion-col>
+    </ion-row>
+
+    <ion-button (click)="verifyCode()"><ion-icon name="checkmark-done-outline"></ion-icon>&nbsp;Verify Code</ion-button>
+  </form>
+  </ion-card-content>
+</ion-card>
+<ion-toast
+    [isOpen]="isToastOpen"
+    message="{{errMessage}}"
+    position="top"
+    cssClass="login_loast"
+    positionAnchor="header"
+    message="Hello World!"
+    [duration]="5000"
+    (didDismiss)="setOpen(false)"
+  ></ion-toast>

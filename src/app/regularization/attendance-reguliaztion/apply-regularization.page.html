@@ -1,0 +1,285 @@
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-card>
+    <ion-card-content>
+      <form action="" [formGroup]="AttendanceRegularizationForm">
+        <ion-list>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Attendance Date <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #att_date>
+                  <ion-accordion value="att">
+                    <ion-item slot="header">
+                      <ion-label>{{attDate?(attDate | date:'MMM d, YY'):'' }}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <ion-datetime presentation="date" id="datetime" slot="content" display-format="MMMM YY"
+                      formControlName="attendance_date" #datetime (ionChange)="searchAttendance()">
+                      <ion-buttons slot="buttons">
+                        <ion-button color="danger" (click)="datetime.reset()">Reset</ion-button>
+                        <ion-button color="primary" (click)="datetime.confirm()">Done</ion-button>
+                      </ion-buttons>
+
+                    </ion-datetime>
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+            <div *ngIf="submitted && AttendanceRegularizationForm.get('attendance_date')?.errors"
+              class="invalid-feedback">
+              <small class="p-error">Attendance date is required</small>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Shift </ion-label>
+              <div class="d-justify">
+                <ion-select placeholder="Select Shift" formControlName="shift_id">
+                  <ion-select-option [value]="lgd.shift_id"
+                    *ngFor="let lgd of allShifts">{{lgd.shift_name}}</ion-select-option>
+                </ion-select>
+              </div>
+              <div *ngIf="submitted && AttendanceRegularizationForm.get('shift_id')?.errors" class="invalid-feedback">
+                <small>Shift is required</small>
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="currentAttendance">
+            <div class="form-group">
+              <ion-grid *ngFor="let attData of AttendanceTrackingList">
+                <ion-row>
+                  <ion-col><b>Shift</b></ion-col>
+                  <ion-col>{{attData.shift_name}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col><b>In Time</b></ion-col>
+                  <ion-col>{{attData.in_time}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col><b>Out Time</b></ion-col>
+                  <ion-col>{{attData.shift_name}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col><b>Late(Min)</b></ion-col>
+                  <ion-col>{{attData.out_time}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col><b>Early(Min)</b></ion-col>
+                  <ion-col>{{attData.early_min}}</ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_InTime"
+                  (ionChange)="onAllowIntime($event)">In Time</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" [ngClass]="isShownInTime?'':'d-hide'">
+            <div class="form-group">
+              <ion-label class="ion-label"> In Time <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #in_time>
+                  <ion-accordion value="in">
+                    <ion-item slot="header">
+                      <ion-label>{{inTime?(inTime ):''}}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <ion-datetime id="datetime" slot="content" presentation="time" formControlName="in_time" #starttime
+                      (ionChange)="inTimeCheck()">
+                      <ion-buttons slot="buttons">
+                        <ion-button color="danger" (click)="starttime.reset()">Reset</ion-button>
+                        <ion-button color="primary" (click)="starttime.confirm()">Done</ion-button>
+                      </ion-buttons>
+                    </ion-datetime>
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_OutTime"
+                  (ionChange)="onAllowOutTime($event)">Out Time</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" [ngClass]="isShownOutTime?'':'d-hide'">
+            <div class="form-group">
+              <ion-label class="ion-label"> Out Time <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #out_time>
+                  <ion-accordion value="out">
+                    <ion-item slot="header">
+                      <ion-label>{{outTime?(outTime ):'' }}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <ion-datetime id="datetime" slot="content" presentation="time" formControlName="out_time" #endtime
+                      (ionChange)="outTimeCheck()">
+                      <ion-buttons slot="buttons">
+                        <ion-button color="danger" (click)="endtime.reset()">Reset</ion-button>
+                        <ion-button color="primary" (click)="endtime.confirm()">Done</ion-button>
+                      </ion-buttons>
+                    </ion-datetime>
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_late_consider">Consider
+                  Late</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_early_consider">Consider
+                  Early</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="make_absent">Make
+                  Absent</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Reason </ion-label>
+              <ion-input placeholder="" formControlName="reason"></ion-input>
+            </div>
+            <div *ngIf="submitted  && AttendanceRegularizationForm.get('reason')?.errors" class="invalid-feedback">
+              <small class="p-error">Reason is required</small>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div class="d-justify">
+                <ion-label class="ion-label"> Approver <span class="required">*</span></ion-label>
+                <a (click)="checkRuleForRecommenderApprover()">
+                  <ion-label style="font-weight:700;font-size: 10px; ">Rule: 1. Need to
+                    assign...<span class="req" style="cursor: pointer">More</span> </ion-label>
+                </a>
+              </div>
+              <ion-item>
+                <ion-input placeholder="Enter aprover" formControlName="approve_employee_name"></ion-input>
+                <ion-button clear slot="end" (click)="getEmployeeList()" *ngIf="isApplyMode"><ion-icon
+                    name="search"></ion-icon></ion-button>
+              </ion-item>
+
+            </div>
+            <div *ngIf="submitted && AttendanceRegularizationForm.controls['approve_employee_name'].errors"
+              class="invalid-feedback">
+              <small class="p-error">Approver is
+                required</small>
+            </div>
+          </ion-item>
+
+          <div class="form-list-item d-justify">
+            <ion-button size="small" color="danger" (click)="close()" class="ion-button-standard action"><ion-icon
+                name="close" slot="start"></ion-icon>Close</ion-button>
+            <ion-button size="small" *ngIf="!isView" color="tertiary" (click)="regularizationApply()"
+              class="ion-button-standard action"> <ion-icon slot="start"
+                name="checkmark-done-outline"></ion-icon>Apply</ion-button>
+
+          </div>
+        </ion-list>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!--end form display------------->
+
+
+  <ion-modal [isOpen]="isRecommenderRule">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Rule for Recommender/Approver</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cancel()" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <div>
+            <p> 1. Need to assign leave policy and attendance policy according to this employee. </p>
+            <p> 2. Must be checked Recommender/Approver required input field according to this leave. </p>
+            <p> 3. Recommender/Approver need to be user. </p>
+            <p> 4. Must have reporting line according to this employee. </p>
+          </div>
+        </ion-item>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isEmployeeLine">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Employee</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cancel()" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-grid>
+            <div *ngFor="let emp of employeeList" class="attendance-table">
+              <ion-row>
+                <ion-col>{{emp.employee_name}}</ion-col>
+                <ion-col><ion-button (click)="selectEmployee(emp)"><ion-icon
+                      name="checkmark-outline"></ion-icon>&nbsp;Select</ion-button></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Company</ion-col>
+                <ion-col>{{emp.company_name}}</ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Official Info</ion-col>
+                <ion-col>{{emp.official_info}}</ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Phone</ion-col>
+                <ion-col>{{emp.personal_phone}}</ion-col>
+              </ion-row>
+
+            </div>
+          </ion-grid>
+
+        </ion-item>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+  <ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast"
+    positionAnchor="header" [duration]="5000" (didDismiss)="setOpen(false)"></ion-toast>
+</ion-content>

@@ -1,0 +1,523 @@
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-card>
+    <ion-card-content>
+      <form action="" [formGroup]="LeaveApplicationForm">
+        <ion-list>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Employee <span class="required">*</span></ion-label>
+              <ion-input placeholder="Enter employee" formControlName="employee_name" [readonly]="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Leave </ion-label>
+              <div class="d-justify">
+                <ion-select expandedIcon="true" placeholder="Select Leave" formControlName="employee_leave_ledger_id"
+                  (ionChange)="onLeaveLedgerChange($event)">
+                  <ion-select-option [value]="lgd.EmployeeLeaveLedgerId"
+                    *ngFor="let lgd of leaveLedgerDetails">{{lgd.LeaveHeadWithBalance}}</ion-select-option>
+                </ion-select>
+              </div>
+              <div *ngIf="submitted && LeaveApplicationForm.controls['employee_leave_ledger_id'].errors"
+                class="invalid-feedback">
+                <small>Leave is required</small>
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-button (click)="viewLeavePolicy()" class="ion-button-standard"><ion-icon
+                  name="eye-outline"></ion-icon>&nbsp;View Leave Policy</ion-button>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownIsHourlyLeave">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_hourly"
+                  (ionChange)="onHalfDayChange($event)">Allow
+                  Hourly Leave</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Start Date <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #start_date>
+                  <ion-accordion value="start">
+                    <ion-item slot="header">
+                      <ion-label>{{startDate?(startDate | date:'MMM d, YY'):'' }}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <ion-datetime presentation="date" id="datetime" slot="content" display-format="MMMM YY"
+                      formControlName="start_date" (ionChange)="onDateChange('start')" #startdate>
+                      <ion-buttons slot="buttons">
+                        <ion-button color="danger" (click)="startdate.reset()">Reset</ion-button>
+                        <ion-button color="primary" (click)="startdate.confirm()">Done</ion-button>
+                      </ion-buttons>
+                    </ion-datetime>
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+            <div *ngIf="submitted && LeaveApplicationForm.controls['start_date'].errors" class="invalid-feedback">
+              <small class="p-error">Start date is required</small>
+            </div>
+          </ion-item>
+
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> End Date <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #end_date>
+                  <ion-accordion value="end">
+                    <ion-item slot="header">
+                      <ion-label>{{endDate?(endDate | date:'MMM d, YY'):'' }}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <ion-datetime presentation="date" id="datetime" slot="content" display-format="MMMM YY"
+                      formControlName="end_date" (ionChange)="onDateChange('end')" #enddate>
+                      <ion-buttons slot="buttons">
+                        <ion-button color="danger" (click)="enddate.reset()">Reset</ion-button>
+                        <ion-button slot="end" color="primary" (click)="enddate.confirm()">Done</ion-button>
+                      </ion-buttons>
+
+                    </ion-datetime>
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+            <div *ngIf="submitted && LeaveApplicationForm.controls['end_date'].errors" class="invalid-feedback">
+              <small class="p-error">End date is required</small>
+            </div>
+          </ion-item>
+
+          <ion-item class="form-list-item" [ngClass]="isShownTimePicker?'':'d-hide'">
+            <div class="form-group">
+              <ion-label class="ion-label"> Start Time <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #start_time>
+                  <ion-accordion value="start-t">
+                    <ion-item slot="header">
+                      <ion-label>{{startTime?(startTime ):'' }}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <ion-datetime id="datetime" slot="content" presentation="time" formControlName="start_time"
+                      #starttime (ionChange)="onTimeChange('start')">
+                      <ion-buttons slot="buttons">
+                        <ion-button color="danger" (click)="starttime.reset()">Reset</ion-button>
+                        <ion-button color="primary" (click)="starttime.confirm()">Done</ion-button>
+                      </ion-buttons>
+
+                    </ion-datetime>
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+            <div *ngIf="submitted && LeaveApplicationForm.controls['start_time'].errors" class="invalid-feedback">
+              <small class="p-error">Start time is required</small>
+            </div>
+          </ion-item>
+
+          <ion-item class="form-list-item" [ngClass]="isShownTimePicker?'':'d-hide'">
+            <div class="form-group">
+              <ion-label class="ion-label"> End Time <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #end_time>
+                  <ion-accordion value="end-t">
+                    <ion-item slot="header">
+                      <ion-label>{{endTime?(endTime ):'' }}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <ion-datetime id="datetime" slot="content" presentation="time" formControlName="end_time" #endtime
+                      (ionChange)="onTimeChange('end')">
+                      <ion-buttons slot="buttons">
+                        <ion-button color="danger" (click)="endtime.reset()">Reset</ion-button>
+                        <ion-button color="primary" (click)="endtime.confirm()">Done</ion-button>
+                      </ion-buttons>
+
+                    </ion-datetime>
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+            <div *ngIf="submitted && LeaveApplicationForm.controls['end_time'].errors" class="invalid-feedback">
+              <small class="p-error">End time is required</small>
+            </div>
+          </ion-item>
+
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Leave Duration <span class="required">*</span></ion-label>
+              <div class="d-justify">
+                <ion-input placeholder="" formControlName="duration_days" [readonly]="true"></ion-input>
+                <span style="padding-top: 8px;">Days or</span>
+                <ion-input placeholder="" formControlName="duration_min" [readonly]="true"></ion-input>
+                <span style="padding-top: 8px;">Hours</span>
+              </div>
+              <div *ngIf="submitted && LeaveApplicationForm.controls['employee_leave_ledger_id'].errors"
+                class="invalid-feedback">
+                <small>Leave is required</small>
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-button expand="block" class="ion-button-standard" (click)="viewAttendanceHistory()"><ion-icon
+                  name="checkmark-outline"></ion-icon>Attendance History</ion-button>
+            </div>
+
+          </ion-item>
+
+          <ion-item class="form-list-item" *ngIf="isShownResponsilbleRequired">
+            <div class="form-group">
+              <ion-label class="ion-label"> Responsible Employee <span class="required">*</span></ion-label>
+
+              <ion-item>
+                <ion-input placeholder="Enter employee" formControlName="responsible_employee_name"></ion-input>
+                <ion-button clear slot="end" (click)="getResponsibleEmployeeList()" *ngIf="isApplyMode"><ion-icon
+                    name="search"></ion-icon></ion-button>
+              </ion-item>
+            </div>
+            <div
+              *ngIf="submitted && isShownResponsilbleRequired && LeaveApplicationForm.controls['req_responsible_employee_id'].errors"
+              class="invalid-feedback">
+              <small class="p-error">Responsible employee is
+                required</small>
+
+            </div>
+            <div class="form-group" *ngIf="isShownResponsilbleRequired && isAcknowldgeShow">
+              <ion-checkbox formControlName="is_acknowledge_required"></ion-checkbox>
+            </div>
+          </ion-item>
+
+          <ion-item class="form-list-item" *ngIf="isShownResponsilbleRequired">
+            <div class="form-group">
+              <ion-label class="ion-label"> Responsibility of assigned employee </ion-label>
+              <ion-input placeholder="Responsibility of assigned employee"
+                formControlName="responsibile_employee_responsibility"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShowRecommender">
+            <div class="form-group">
+              <div class="d-justify">
+                <ion-label class="ion-label"> Recommender Employee <span class="required">*</span></ion-label>
+                <a (click)="checkRuleForRecommenderApprover()">
+                  <ion-label style="font-weight:700;font-size: 10px; ">Rule: 1. Need to
+                    assign...<span class="req" style="cursor: pointer">More</span> </ion-label>
+                </a>
+              </div>
+
+              <ion-item>
+                <ion-input placeholder="Enter recommend person" formControlName="recommend_employee_name"></ion-input>
+                <ion-button clear slot="end" (click)="getEmployeeList('recommend_employee_name')"
+                  *ngIf="isApplyMode"><ion-icon name="search"></ion-icon></ion-button>
+              </ion-item>
+            </div>
+            <div
+              *ngIf="submitted && isShownResponsilbleRequired && LeaveApplicationForm.controls['req_recommend_employee_id'].errors"
+              class="invalid-feedback">
+              <small class="p-error">Recommender employee is
+                required</small>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div class="d-justify">
+                <ion-label class="ion-label"> Approver <span class="required">*</span></ion-label>
+                <a (click)="checkRuleForRecommenderApprover()">
+                  <ion-label style="font-weight:700;font-size: 10px; ">Rule: 1. Need to
+                    assign...<span class="req" style="cursor: pointer">More</span> </ion-label>
+                </a>
+              </div>
+              <ion-item>
+                <ion-input placeholder="Enter aprover" formControlName="approve_employee_name"></ion-input>
+                <ion-button clear slot="end" (click)="getEmployeeList('approve_employee_name')"
+                  *ngIf="isApplyMode"><ion-icon name="search"></ion-icon></ion-button>
+              </ion-item>
+
+            </div>
+            <div
+              *ngIf="submitted && isShownResponsilbleRequired && LeaveApplicationForm.controls['req_approve_employee_id'].errors"
+              class="invalid-feedback">
+              <small class="p-error">Recommender employee is
+                required</small>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownAttachmentRequired">
+            <div class="form-group">
+              <ion-label class="ion-label"> Attachment <span class="required">*</span></ion-label>
+              <!-- *ngIf="isShownAttachmentRequired" -->
+              <ion-button expand="block" color="medium" class="ion-button-standard">
+                <ion-icon lazy="true" slot="start" name="image"></ion-icon>
+                <input type="file" accept="application/pdf,image/jpeg,image/tiff,.tif" formControlName="FileUpload"
+                  (change)="documentFormFileInput($event)">
+              </ion-button>
+
+            </div>
+
+            <div
+              *ngIf="submitted && isShownAttachmentRequired  &&  LeaveApplicationForm.controls['req_approve_employee_id'].errors"
+              class="invalid-feedback">
+              <small class="p-error">Attachment is required</small>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownAttachmentName">
+            <div class="form-group">
+              <ion-label class="ion-label"> Attachment Name <span class="req"></span></ion-label>
+              <ion-input placeholder="Attachment Name" formControlName="attachment_name" readonly="true"></ion-input>
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownAttachmentName">
+
+            <div class="form-group" *ngIf="isShownAttachmentName">
+              <ion-button expand="block" (click)="downloadFile()" class="ion-button-standard">
+                <ion-icon lazy="true" slot="start" name="download-outline"></ion-icon>Download
+              </ion-button>
+            </div>
+          </ion-item>
+
+          <ion-item class="form-list-item" *ngIf="isShownAreaRequired">
+            <div class="form-group">
+              <ion-label class="ion-label"> Enjoyable area </ion-label>
+              <ion-input placeholder="" formControlName="enjoyable_area"></ion-input>
+            </div>
+            <div *ngIf="submitted && isShownAreaRequired && LeaveApplicationForm.controls['enjoyable_area'].errors"
+              class="invalid-feedback">
+              <small class="p-error">Enjoyable area is required</small>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShownRequiredPurpose">
+            <div class="form-group">
+              <ion-label class="ion-label"> Purpose </ion-label>
+              <ion-input placeholder="" formControlName="purpose"></ion-input>
+            </div>
+            <div *ngIf="submitted && isShownAreaRequired && LeaveApplicationForm.controls['purpose'].errors"
+              class="invalid-feedback">
+              <small class="p-error">Purpose is required</small>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Remarks </ion-label>
+              <ion-input placeholder="" formControlName="remarks"></ion-input>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="isShowSendMail">
+            <div class="form-group">
+              <ion-checkbox labelPlacement="end" formControlName="is_send_email">Send Email</ion-checkbox>
+            </div>
+
+          </ion-item>
+          <div class="form-list-item d-justify o-gap">
+            <ion-button color="danger" (click)="goBack()" class="ion-button-standard action" size="small"><ion-icon
+                slot="start" name="save-outline"></ion-icon>Back</ion-button>
+            <ion-button *ngIf="isApplyMode" color="success" (click)="checkDraft()" class="ion-button-standard action"
+              size="small"><ion-icon slot="start" name="save-outline"></ion-icon>Draft</ion-button>
+            <ion-button *ngIf="isApplyMode" color="tertiary" (click)="checkApply()" class="ion-button-standard action"
+              size="small">
+              <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>Apply</ion-button>
+
+          </div>
+        </ion-list>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!--end form display------------->
+
+  <ion-modal [isOpen]="isleavePolicyModal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+
+          <ion-title>Leave Policy Details</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cancel()" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <form action="" [formGroup]="LeavePolicyForm" class="popup-policy">
+
+            <div class="p-fluid grid col-12">
+              <label for="" style="font-weight: bold;" class=" d-none d-md-inline-flex">Max enjoyable Limit: </label>
+              <label style="padding-left:8px">{{LeavePolicyForm.controls['max_enjoyable_limit_min'].value}}</label>
+
+            </div>
+            <div class="p-fluid grid col-12">
+              <label for="" style="font-weight: bold;" class=" d-none d-md-inline-flex">Notice Period: </label>
+              <label style="padding-left:8px">{{LeavePolicyForm.controls['notice_period'].value}} for</label>
+              <label style="padding-left:8px">{{LeavePolicyForm.controls['notice_required_for_min'].value}} day</label>
+            </div>
+            <div class="p-fluid grid col-12">
+              <label for="" style="font-weight: bold;" class=" d-none d-md-inline-flex">Encashment Limit: </label>
+              <label
+                style="padding-left:8px">{{LeavePolicyForm.controls['encash_leave_balance_limit_min'].value}}</label>
+
+            </div>
+            <div class="p-fluid grid col-12">
+              <label for="" style="font-weight: bold;" class=" d-none d-md-inline-flex">Allow Prefix: </label>
+              <label style="padding-left:8px">{{LeavePolicyForm.controls['is_prefix'].value}}</label>
+
+            </div>
+            <div class="p-fluid grid col-12">
+              <label for="" style="font-weight: bold;" class=" d-none d-md-inline-flex">Allow Sufix: </label>
+              <label style="padding-left:8px">{{LeavePolicyForm.controls['is_sufix'].value}}</label>
+
+            </div>
+            <div class="p-fluid grid col-12">
+              <label for="" style="font-weight: bold;" class=" d-none d-md-inline-flex">Allow Sandwich: </label>
+              <label style="padding-left:8px">{{LeavePolicyForm.controls['is_allow_sandwich'].value}}</label>
+
+            </div>
+            <div class="p-fluid grid col-12">
+              <label for="" style="font-weight: bold;" class=" d-none d-md-inline-flex">Allow Negative: </label>
+              <label style="padding-left:8px">{{LeavePolicyForm.controls['is_negetive_balance'].value}}</label>
+            </div>
+          </form>
+        </ion-item>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+  <ion-modal [isOpen]="isAttdenceSummary">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+
+          <ion-title>Attendance History</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cancel()" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <div class="full-width">
+            <ion-grid>
+              <div *ngFor="let att of attendanceTrackingList" class="attendance-table">
+                <ion-row>
+                  <ion-col>Date</ion-col>
+                  <ion-col>{{att.attendance_date}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>Shift</ion-col>
+                  <ion-col>{{att.shift_name}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>In Time</ion-col>
+                  <ion-col>{{att.in_time}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>Out Time</ion-col>
+                  <ion-col>{{att.out_time}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>Late(Min)</ion-col>
+                  <ion-col>{{att.late_min}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>Early(Min)</ion-col>
+                  <ion-col>{{att.early_min}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>Status</ion-col>
+                  <ion-col>{{att.attendance_status}}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>Remarks</ion-col>
+                  <ion-col>{{att.note}}</ion-col>
+                </ion-row>
+              </div>
+            </ion-grid>
+          </div>
+        </ion-item>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+  <ion-modal [isOpen]="isRecommenderRule">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Rule for Recommender/Approver</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cancel()" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <div>
+            <p> 1. Need to assign leave policy and attendance policy according to this employee. </p>
+            <p> 2. Must be checked Recommender/Approver required input field according to this leave. </p>
+            <p> 3. Recommender/Approver need to be user. </p>
+            <p> 4. Must have reporting line according to this employee. </p>
+          </div>
+        </ion-item>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isEmployeeLine">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Employee</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cancel()" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-grid>
+            <div *ngFor="let emp of employeeList" class="attendance-table">
+              <ion-row>
+                <ion-col>{{emp.employee_name}}</ion-col>
+                <ion-col><ion-button (click)="selectEmployee(emp)"><ion-icon
+                      name="checkmark-outline"></ion-icon>&nbsp;Select</ion-button></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Company</ion-col>
+                <ion-col>{{emp.company_name}}</ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Official Info</ion-col>
+                <ion-col>{{emp.official_info}}</ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Phone</ion-col>
+                <ion-col>{{emp.personal_phone}}</ion-col>
+              </ion-row>
+
+            </div>
+          </ion-grid>
+
+        </ion-item>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+
+
+<ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast" positionAnchor="header"
+  message="Hello World!" [duration]="5000" (didDismiss)="setOpen(false)"></ion-toast>

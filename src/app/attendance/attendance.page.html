@@ -1,0 +1,64 @@
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-card class="top-card">
+    <ion-card-content>
+      <div class="d-justify">
+        <ion-label>
+          <span *ngIf="isWithinArea">You are in attendance location</span>
+          <span *ngIf="isWithinArea === false">You are not in attendance location</span>
+
+        </ion-label>
+        <ion-icon name="ellipse" [class.red]="isWithinArea === false" [class.green]="isWithinArea "></ion-icon>
+      </div>
+      <!-- {{targetLat}}_{{ targetLon}}_{{radius}} -->
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="att-card">
+    <ion-card-content>
+      <div class="header">Today</div>
+      <hr class="header-hr">
+      <div class="today-row">
+        <span class="today-head key-head">Check In:</span>
+        <span class="today-value value-body">{{attendanceToday &&
+          attendanceToday.length?(attendanceToday[0].in_date_time | date:'h:mm a'):'--' }}</span>
+      </div>
+      <hr>
+      <div class="today-row">
+        <span class="today-head key-head">Check Out:</span>
+        <span class="today-value value-body">{{attendanceToday &&
+          attendanceToday.length && attendanceToday[0].out_date_time
+          !=='1900-01-01T00:00:00'?(attendanceToday[0].out_date_time | date:'h:mm a'):'--'}}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <!-- <ion-list>
+      <ion-item *ngFor="let location of locations">
+        {{ location?.coords?.latitude }}, {{ location?.coords?.longitude }}
+      </ion-item>
+    </ion-list> -->
+
+</ion-content>
+<ion-footer [translucent]="true">
+  <ion-toolbar>
+    <!-- <span>{{distance}}</span> -->
+    <ion-button expand="block" size="large" color="tertiary" [disabled]="isWithinArea === false" *ngIf="isCheckIn"
+      (click)="addAttendance()">
+      <ion-icon slot="start" src="assets/svg/check-in-green-icon.svg">
+      </ion-icon>
+      {{'Check In'}}
+    </ion-button>
+    <ion-button expand="full" size="large" color="tertiary" [disabled]="isWithinArea === false" *ngIf="!isCheckIn"
+      (click)="addAttendance()">
+      <ion-icon slot="start" src="assets/svg/check-out-red-icon.svg">
+      </ion-icon>
+      {{'Check Out'}}
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+
+<ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast" positionAnchor="header"
+  message="Hello World!" [duration]="5000" (didDismiss)="setOpen(false)"></ion-toast>

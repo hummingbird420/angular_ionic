@@ -1,0 +1,71 @@
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+  <!-- 'attendance_date_formatted', 'shift_name', 'approvedBy', 'ar_status_name' -->
+  <div *ngIf="(regularization$ |async) as regularization">
+    <ion-item>
+      <div class="full-width">
+        <ion-grid>
+          <div *ngFor="let att of regularization" class="attendance-table">
+            <ion-row>
+              <ion-col>Applied Date</ion-col>
+              <ion-col><span>{{att.apply_date | date:'MMM d'}}</span></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Shift </ion-col>
+              <ion-col><b>{{att.shift_name}}</b></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Date</ion-col>
+              <ion-col>
+                <b><span>{{att.attendance_date_formatted}}</span></b>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Approver</ion-col>
+              <ion-col>
+                <span style="word-break: break-word;">{{att.approve_employee_name}}</span>
+
+              </ion-col>
+            </ion-row>
+
+
+            <ion-row>
+              <ion-col>Status</ion-col>
+              <ion-col>
+                {{att.ar_status_name}}
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <!-- <ion-button color="tertiary" (click)="editApplication(att)"><ion-icon name="pencil"></ion-icon> &nbsp;Edit</ion-button> -->
+                 <ion-button color="medium" (click)="viewApplication(att)"><ion-icon name="eye"></ion-icon>&nbsp;View</ion-button>
+                <!--<ion-button color="danger" (click)="deleteApplication(att)"><ion-icon name="trash"></ion-icon>&nbsp;Del</ion-button>
+                <ion-button color="danger" (click)="cancelApplication(att)"><ion-icon name="close"></ion-icon>&nbsp; Can</ion-button> -->
+              </ion-col>
+
+            </ion-row>
+          </div>
+        </ion-grid>
+      </div>
+    </ion-item>
+
+</div>
+
+
+</ion-content>
+
+
+<ion-toast
+    [isOpen]="isToastOpen"
+    message="{{errMessage}}"
+    position="top"
+    cssClass="login_loast"
+    positionAnchor="header"
+    message="Hello World!"
+    [duration]="5000"
+    (didDismiss)="setOpen(false)"
+  ></ion-toast>

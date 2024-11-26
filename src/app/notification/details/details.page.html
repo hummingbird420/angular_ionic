@@ -1,0 +1,48 @@
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div>
+    <div *ngIf="noticeDetails$|async as noticeDetails" class="notice-content">
+      <div *ngIf="noticeDetails.length">
+        <div class="header">
+          <div><ion-icon name="notifications-circle" class="notice-icon"></ion-icon></div>
+          <div>
+            <b>{{noticeDetails[0].formated_issue_date}}</b>
+            <div><b>{{noticeDetails[0].notice_subject}}</b></div>
+          </div>
+        </div>
+        <div class="body">
+          <div><b>Effective On: {{noticeDetails[0].formated_effective_date}}</b></div>
+          <div><b>Expire On: {{noticeDetails[0].formated_expiry_date}}</b></div>
+          <br>
+          {{noticeDetails[0].notice_description}}
+
+        </div>
+        <div class="footer" *ngIf="noticeDetails[0].file_name && noticeDetails[0].file_name!=='null'"
+          (click)="viewFile(noticeDetails[0])">
+          <a><b>Attechment: {{noticeDetails[0].file_name}}</b></a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <ion-modal [isOpen]="isModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="end">
+            <ion-button (click)="setOpen(false)">&times;</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <img [src]="imgUrl" alt="">
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+<ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast" positionAnchor="header"
+  [duration]="5000" (didDismiss)="setToastOpen(false)"></ion-toast>

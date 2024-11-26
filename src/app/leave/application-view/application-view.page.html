@@ -1,0 +1,73 @@
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="(leaveApplication$ |async) as appliedLeave">
+    <ion-item>
+      <div class="full-width">
+        <ion-grid>
+          <div *ngFor="let leave of appliedLeave" class="attendance-table">
+            <ion-row>
+              <ion-col>Applied Date</ion-col>
+              <ion-col><b><span>{{leave.apply_date | date:'MMM d'}}</span></b></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Leave Type </ion-col>
+              <ion-col><b>{{leave.leave}}</b></ion-col>
+            </ion-row>
+
+            <ion-row *ngIf="leave.purpose ">
+              <ion-col>Purpose</ion-col>
+              <ion-col>{{resizeLeaveContent(leave.purpose)}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Date</ion-col>
+              <ion-col>
+                <b><span>{{leave.start_date | date:'d MMM, yy'}}</span></b> &nbsp;
+                <span   *ngIf="leave.start_date !== leave.end_date"> to  <b>{{leave.end_date | date:'d MMM, yy'}}</b></span>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Duration</ion-col>
+              <ion-col>
+                {{leave.duration}}
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Status & Approver</ion-col>
+              <ion-col><b><span>{{leave.leave_status_name}}</span><br></b>
+                <span >{{leave.req_approve_employee  }}</span></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <ion-button color="tertiary" (click)="editApplication(leave)"><ion-icon name="pencil"></ion-icon> &nbsp;Edit</ion-button>
+                <ion-button color="medium" (click)="viewApplication(leave)"><ion-icon name="eye"></ion-icon>&nbsp;View</ion-button>
+                <ion-button color="danger" (click)="deleteApplication(leave)"><ion-icon name="trash"></ion-icon>&nbsp;Del</ion-button>
+                <ion-button color="danger" (click)="cancelApplication(leave)"><ion-icon name="close"></ion-icon>&nbsp; Can</ion-button>
+              </ion-col>
+
+            </ion-row>
+          </div>
+        </ion-grid>
+      </div>
+    </ion-item>
+
+</div>
+
+
+</ion-content>
+
+
+<ion-toast
+    [isOpen]="isToastOpen"
+    message="{{errMessage}}"
+    position="top"
+    cssClass="login_loast"
+    positionAnchor="header"
+    message="Hello World!"
+    [duration]="5000"
+    (didDismiss)="setOpen(false)"
+  ></ion-toast>

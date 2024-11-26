@@ -1,0 +1,13 @@
+{
+  "name": "SelfServiceApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular",
+  "proxies": [
+    {
+      "path": "/api",
+      "proxyUrl": "http://115.127.82.90:86/api"
+    }
+  ]
+}

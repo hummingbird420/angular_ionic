@@ -1,0 +1,268 @@
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+  <!-- 'attendance_date_formatted', 'shift_name', 'approvedBy', 'ar_status_name' -->
+  <div *ngIf="(regularization$ |async) as regularization">
+    <ion-item>
+      <div class="full-width">
+        <ion-grid>
+          <div *ngFor="let att of regularization" class="attendance-table">
+            <ion-row>
+              <ion-col>Applied Date</ion-col>
+              <ion-col><span>{{att.apply_date | date:'MMM d'}}</span></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Employee</ion-col>
+              <ion-col>
+                <span style="word-break: break-word;">{{att.employee_name}}</span>
+
+              </ion-col>
+            </ion-row>
+            <!-- <ion-row>
+              <ion-col>Shift </ion-col>
+              <ion-col><b>{{att.shift_name}}</b></ion-col>
+            </ion-row> -->
+            <ion-row *ngIf="att.reason && att.reason!=='null'">
+              <ion-col>Reason </ion-col>
+              <ion-col><b>{{att.reason}}</b></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>Date</ion-col>
+              <ion-col>
+                <b><span>{{att.attendance_date_formatted}}</span></b>
+              </ion-col>
+            </ion-row>
+
+            <ion-row>
+              <ion-col>Status</ion-col>
+              <ion-col>
+                {{att.ar_status_name}}
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-button color="tertiary" (click)="approveApplication(att)"><ion-icon name="checkmark-done"></ion-icon>
+                &nbsp;Approve</ion-button>
+              <ion-button color="medium" (click)="viewApplication(att)"><ion-icon
+                  name="eye"></ion-icon>&nbsp;View</ion-button>
+              <ion-button color="danger" (click)="rejectApplication(att)"><ion-icon
+                  name="trash"></ion-icon>&nbsp;Reject</ion-button>
+
+            </ion-row>
+          </div>
+        </ion-grid>
+      </div>
+    </ion-item>
+  </div>
+</ion-content>
+
+<ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast" positionAnchor="header"
+  message="Hello World!" [duration]="5000" (didDismiss)="setOpen(false)"></ion-toast>
+
+<ion-modal [isOpen]="isApproveModal">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+
+        <ion-title>Confirm {{header}}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cancel()" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item>
+        <ion-textarea label="Remarks/Note" labelPlacement="stacked" [(ngModel)]="txtRemarks"
+          placeholder="Type remarks or note"></ion-textarea>
+      </ion-item>
+      <ion-item>
+        <ion-button (click)="onApproveOrReject()"><ion-icon name="checkmark-done"></ion-icon> &nbsp;Submit</ion-button>
+        <ion-button color="danger" (click)="cancel()"><ion-icon name="close"></ion-icon>&nbsp;Close</ion-button>
+
+      </ion-item>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="isActionDisplay">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>View Application</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="isActionDisplay=false" [strong]="true"><ion-icon name="close"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <form action="" [formGroup]="AttendanceRegularizationForm">
+        <ion-list>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Attendance Date <span class="required">*</span></ion-label>
+              <div>
+                <ion-item>
+                  <ion-label>{{attDate?(attDate | date:'MMM d, YY'):'' }}</ion-label>
+                </ion-item>
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Shift </ion-label>
+              <div class="d-justify">
+                <ion-select placeholder="Select Shift" formControlName="shift_id">
+                  <ion-select-option [value]="lgd.shift_id"
+                    *ngFor="let lgd of allShifts">{{lgd.shift_name}}</ion-select-option>
+                </ion-select>
+              </div>
+
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item" *ngIf="currentAttendance">
+            <div class="form-group">
+              <table>
+                <tr>
+                  <th>Shift</th>
+                  <th>In Time</th>
+                  <th>Out Time</th>
+                  <th>Late(Min)</th>
+                  <th>Early(Min)</th>
+                </tr>
+                <tr *ngFor="let attData of AttendanceTrackingList">
+                  <td>{{attData.shift_name}}</td>
+                  <td>{{attData.in_time}}</td>
+                  <td>{{attData.out_time}}</td>
+                  <td>{{attData.late_min}}</td>
+                  <td>{{attData.early_min}}</td>
+                </tr>
+              </table>
+            </div>
+
+          </ion-item>
+
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_InTime">In
+                  Time</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" [ngClass]="isShownInTime?'':'d-hide'">
+            <div class="form-group">
+              <ion-label class="ion-label"> In Time <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #in_time>
+                  <ion-accordion value="in">
+                    <ion-item slot="header">
+                      <ion-label>{{inTime?(inTime ):''}}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_OutTime">In
+                  Time</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item" [ngClass]="isShownOutTime?'':'d-hide'">
+            <div class="form-group">
+              <ion-label class="ion-label"> Out Time <span class="required">*</span></ion-label>
+              <div>
+                <ion-accordion-group #out_time>
+                  <ion-accordion value="out">
+                    <ion-item slot="header">
+                      <ion-label>{{outTime?(outTime ):'' }}</ion-label>
+                      <ion-note slot="end" id="datetimeValue"></ion-note>
+                    </ion-item>
+                    <!-- <ion-datetime id="datetime" slot="content" presentation="time"
+                        formControlName="out_time">
+                        <ion-button color="primary" (click)="outTimeCheck()">Done</ion-button>
+                      </ion-datetime> -->
+                  </ion-accordion>
+                </ion-accordion-group>
+
+              </div>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_late_consider">Consider
+                  Late</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="is_early_consider">Consider
+                  Early</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div>
+                <ion-checkbox labelPlacement="end" style="width: auto;" formControlName="make_absent">Make
+                  Absent</ion-checkbox>
+              </div>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Reason </ion-label>
+              <ion-input placeholder="" formControlName="reason"></ion-input>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <div class="d-justify">
+                <ion-label class="ion-label"> Approver <span class="required">*</span></ion-label>
+
+              </div>
+              <ion-item>
+                <ion-input placeholder="Enter aprover" formControlName="approve_employee_name"></ion-input>
+              </ion-item>
+
+            </div>
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Approve Note </ion-label>
+              <ion-input placeholder="" formControlName="approver_note"></ion-input>
+            </div>
+
+          </ion-item>
+          <ion-item class="form-list-item">
+            <div class="form-group">
+              <ion-label class="ion-label"> Reject Note</ion-label>
+              <ion-input placeholder="" formControlName="reject_note"></ion-input>
+            </div>
+
+          </ion-item>
+        </ion-list>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>

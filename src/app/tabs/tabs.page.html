@@ -1,0 +1,90 @@
+<app-loader style="z-index: 1040;"></app-loader>
+<ion-menu contentId="main-content" menuId="this-menu">
+  <ion-header class="menu-color">
+    <ion-toolbar *ngIf="userInfo$ |async as user" class="menu-color ">
+      <div class="d-flex menu-color">
+        <img style="width: 32px; margin-left: 28px" src="{{user?.user?.UserImagePath}}">
+        <ion-title>{{user?.user?.UserName}}</ion-title>
+      </div>
+
+    </ion-toolbar>
+
+  </ion-header>
+  <ion-content class="ion-padding menu-color">
+    <ion-item class="menu-color-item" (click)="navigateMenu('/dashboard')">
+      <ion-icon aria-hidden="true" name="home-outline"></ion-icon>&nbsp;
+      <ion-label>Dashboard</ion-label>
+    </ion-item>
+    <ion-item class="menu-color-item" (click)="navigateMenu('/attendance')">
+      <ion-icon aria-hidden="true" name="woman-outline"></ion-icon>&nbsp;
+      <ion-label>Attendance</ion-label>
+    </ion-item>
+
+    <ion-item class="menu-color-item" (click)="navigateMenu('/leave')">
+      <ion-icon aria-hidden="true" name="log-out-outline"></ion-icon>&nbsp;
+      <ion-label>Leave</ion-label>
+    </ion-item>
+    <ion-item class="menu-color-item" (click)="navigateMenu('/regularization')">
+      <ion-icon aria-hidden="true" name="swap-vertical-outline"></ion-icon>&nbsp;
+      <ion-label>Regularization</ion-label>
+    </ion-item>
+    <ion-item class="menu-color-item" (click)="navigateMenu('/notification')">
+      <ion-icon aria-hidden="true" name="document-text-outline"></ion-icon>&nbsp;
+      <ion-label>Notice</ion-label>
+    </ion-item>
+    <ion-item class="menu-color-item" (click)="routeChangePassword()">
+      <ion-icon aria-hidden="true" name="keypad"></ion-icon>
+      &nbsp;
+      <ion-label>Change Password</ion-label>
+
+    </ion-item>
+    <ion-button size="small" fill="outline" expand="block" (click)="logOut()"><ion-icon
+        name="log-out-outline"></ion-icon>&nbsp;<span style="color: #fff;">Logout</span> </ion-button>
+  </ion-content>
+</ion-menu>
+<div class="ion-page" id="main-content">
+  <ion-header>
+    <ion-toolbar *ngIf="headerInfo$ |async as header" class="new-background-color">
+      <ion-button slot="start" (click)="openFirstMenu()" fill="clear">
+        <ion-icon aria-hidden="true" name="menu"></ion-icon>
+      </ion-button>
+      <ion-title>
+        <div class="d-justify">
+          <span style="margin-top: 8px;"> {{header.header}}</span>
+          <span style="font-size: medium;" *ngIf="header.isNewButton"><ion-button size="small"
+              [routerLink]="header.newButtonLink"><ion-icon name="add"></ion-icon></ion-button></span>
+        </div>
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-tabs style="position: relative;" class="tab-color">
+
+    <ion-tab-bar slot="bottom">
+
+      <ion-tab-button tab="dashboard">
+        <ion-icon aria-hidden="true" name="home-outline"></ion-icon>
+        <ion-label>Dashboard</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="attendance">
+        <ion-icon aria-hidden="true" name="woman-outline"></ion-icon>
+        <ion-label>Attendance</ion-label>
+      </ion-tab-button>
+      <!-- <ion-tab-button tab="leave">
+        <ion-icon aria-hidden="true" name="log-out-outline"></ion-icon>
+        <ion-label>Leave</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="regularization">
+        <ion-icon aria-hidden="true" name="swap-vertical-outline"></ion-icon>
+        <ion-label>Regularization</ion-label>
+      </ion-tab-button> -->
+      <ion-tab-button tab="notification">
+        <ion-icon aria-hidden="true" name="document-text-outline"></ion-icon>
+        <ion-label>Notice</ion-label>
+      </ion-tab-button>
+
+    </ion-tab-bar>
+
+  </ion-tabs>
+</div>

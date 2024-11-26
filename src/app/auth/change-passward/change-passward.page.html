@@ -1,0 +1,62 @@
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-card>
+    <ion-card-content>
+      <form action="" [formGroup]="changePasswordForm">
+        <ion-list>
+
+          <ion-item class="form-list-item" >
+            <div class="form-group">
+              <ion-label class="ion-label"> Current Password </ion-label>
+              <ion-input type="password" placeholder="*************" formControlName="currentPassword"></ion-input>
+            </div>
+
+          </ion-item>
+
+
+            <div *ngIf="submitted  && changePasswordForm.get('currentPassword')?.errors" class="invalid-feedback">
+              <small class="p-error">Current password is required</small>
+            </div>
+
+          <ion-item class="form-list-item" >
+            <div class="form-group">
+              <ion-label class="ion-label"> New Password </ion-label>
+              <ion-input type="password" placeholder="*************" formControlName="password"></ion-input>
+            </div>
+
+          </ion-item>
+          <div *ngIf="submitted  && changePasswordForm.get('password')?.errors" class="invalid-feedback">
+            <small class="p-error">New Password is required</small>
+          </div>
+          <ion-item class="form-list-item" >
+            <div class="form-group">
+              <ion-label class="ion-label"> Confirm Password </ion-label>
+              <ion-input type="password" placeholder="*************" formControlName="confirmPassword"></ion-input>
+            </div>
+
+          </ion-item>
+          <div *ngIf="changePasswordForm.errors?.['passwordMismatch']" class="invalid-feedback">
+            <small class="p-error">Password not match!</small>
+          </div>
+
+          <div class="form-list-item d-justify">
+
+            <ion-button size="small" expand="block" color="tertiary" (click)="changePassword()" class="ion-button-standard action"> <ion-icon
+                slot="start" name="checkmark-done-outline"></ion-icon>Change Password</ion-button>
+
+          </div>
+        </ion-list>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!--end form display------------->
+
+
+
+<ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast" positionAnchor="header"
+  message="Hello World!" [duration]="5000" (didDismiss)="setOpen(false)"></ion-toast>

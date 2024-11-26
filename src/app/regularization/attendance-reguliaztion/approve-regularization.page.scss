@@ -1,0 +1,50 @@
+.form-list-item{
+  padding: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 16px ;
+  ion-button.action{
+min-width:40%;
+  }
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.ion-label {
+  font-size: small;
+  margin-left: 8px;
+  .required {
+    color: red;
+  }
+}
+.d-justify{
+  display: flex;
+  gap: 16px;
+justify-content: space-between;
+}
+.popup-policy{
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-bottom: 16px;
+}
+.attendance-table{
+width: 100%;
+border-bottom: .5px solid ;
+}
+ion-col {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+}
+.full-width{
+  width: 100%;
+}
+.d-hide{
+  display: none;
+}

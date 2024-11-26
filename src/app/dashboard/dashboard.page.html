@@ -1,0 +1,538 @@
+<!-- <ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header> -->
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card class="user-card-main">
+    <ion-card-content class="div-user-card" *ngIf="(users$ |async) as users">
+
+      <div class="user-card" *ngIf="users.length">
+        <img class="user-img" src="data:image/png;base64, {{users[0].employee_image_path}}">
+        <div class="user-info">
+          <span class="user-info-name">[{{users[0].code}}]- {{users[0].employee_name}}</span>
+          <span>{{users[0].designation_name}}</span>
+          <span>{{users[0].department_name}}</span>
+          <span>{{users[0].location_name}},</span>
+          <span>{{users[0].company_name}}.</span>
+          <span>{{users[0].address_note}}</span>
+        </div>
+      </div>
+
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-content>
+      <div class="header">Today Attendance</div>
+      <hr class="header-hr">
+      <div class="today-row">
+        <span class="today-head key-head">Check In:</span>
+        <span class="today-value value-body">{{attendanceToday &&
+          attendanceToday.length?(attendanceToday[0].in_date_time | date:'h:mm a'):'--' }}</span>
+      </div>
+
+      <div class="today-row">
+        <span class="today-head key-head">Late (Minutes):</span>
+        <span class="today-value value-body">{{attendanceToday &&
+          attendanceToday.length && attendanceToday[0].late_min >0?attendanceToday[0].late_min:'--'}}</span>
+      </div>
+      <hr>
+      <div class="today-row">
+        <span class="today-head key-head">Check Out:</span>
+        <span class="today-value value-body">{{attendanceToday &&
+          attendanceToday.length && attendanceToday[0].out_date_time
+          !=='1900-01-01T00:00:00'?(attendanceToday[0].out_date_time | date:'h:mm a'):'--'}}</span>
+      </div>
+
+      <div class="today-row">
+        <span class="today-head key-head">Over Time (Minutes):</span>
+        <span class="today-value value-body">{{attendanceToday &&
+          attendanceToday.length && attendanceToday[0].OT_min >0?attendanceToday[0].OT_min:'--'}}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-content *ngIf="(attendanceHistory$ |async) as attendanceHistory">
+
+      <div class="attendance-summary" *ngIf="attendanceHistory.length">
+
+        <div class="attendance-summary-section">
+          <span class="attendance-summary-head">Present (Days)</span>
+          <span class="attendance-summary-body">{{attendanceHistory[0].present_count }}</span>
+        </div>
+        <hr>
+        <div class="attendance-summary-section">
+          <span class="attendance-summary-head">Absent (Days)</span>
+          <span class="attendance-summary-body">{{attendanceHistory[0].absent_count}}</span>
+        </div>
+        <hr>
+        <div class="attendance-summary-section">
+          <span class="attendance-summary-head">Leave (Days)</span>
+          <span class="attendance-summary-body">{{attendanceHistory[0].leave_count}}</span>
+        </div>
+        <hr>
+        <div class="attendance-summary-section">
+          <span class="attendance-summary-head">Late (Minutes)</span>
+          <span class="attendance-summary-body">{{attendanceHistory[0].late_min | minuteToHour}} in
+            {{attendanceHistory[0].late_days}} {{attendanceHistory[0].late_days?'Day':'Days'}} </span>
+        </div>
+
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="leave-chart">
+    <ion-card-header>
+      <ion-card-subtitle>Leave Chart</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <highcharts-chart *ngIf="casualLeaveOptions" [Highcharts]="casualLeaveChart" [options]="casualLeaveOptions"
+        style="width: 80vw; height: auto; display: block;"></highcharts-chart>
+      <br>
+      <highcharts-chart *ngIf="medicalLeaveOptions" [Highcharts]="medicalLeaveChart" [options]="medicalLeaveOptions"
+        style="width: 80vw; height: auto; display: block;"></highcharts-chart>
+    </ion-card-content>
+  </ion-card>
+  <ion-card class="leave-chart">
+    <ion-card-header>
+      <ion-card-subtitle>Absent Statistics</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <highcharts-chart *ngIf="absentOptions" [Highcharts]="absentChart" [options]="absentOptions"
+        style="width: 80vw; height: auto; display: block;"></highcharts-chart>
+
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+
+      <ion-card-subtitle>
+        <div class="notice-header d-justify">
+          <div>
+            <span>
+              Notices
+            </span>
+            <span class="notice-circle">
+              {{(notice$ |async)?.length}}
+            </span>
+          </div>
+          <div>
+            <a (click)="routeNotice()">View All</a>
+          </div>
+
+        </div>
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div *ngIf="(notice$ |async) as noticeList">
+        <table>
+          <tbody>
+            <tr *ngFor="let notice of noticeList">
+              <td class="first-column">
+                <span class="notice-subject">{{resizeNoticeContent(notice.notice_subject)}}</span><br>
+                <span class="notice-body">{{resizeNoticeContent(notice.notice_description)}}</span>
+              </td>
+              <td class="last-column">
+
+                <span>{{ notice.issue_date | date:'MMM d'}}</span>
+                <br>
+                <a (click)="routeNoticeById(notice.notice_board_id)">View</a>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+
+      <ion-card-subtitle>
+        <div class="">
+
+          <div class="calendar-content">
+            <ion-accordion-group #start_date>
+              <ion-accordion value="start">
+                <ion-item slot="header">
+                  <ion-label>{{timeCardStartDate?(timeCardStartDate | date:'MMM d, YY'):'Select Start Date'
+                    }}</ion-label>
+                  <ion-note slot="end" id="datetimeValue"></ion-note>
+                </ion-item>
+                <ion-datetime presentation="date" id="datetime" slot="content" display-format="MMMM YY"
+                  [(ngModel)]="timeCardStartDate" #datetime1>
+                  <ion-buttons slot="buttons">
+                    <ion-button color="danger" (click)="datetime1.reset()">Reset</ion-button>
+                    &nbsp;
+                    <ion-button color="primary" (click)="toggleAccordion1()">Done</ion-button>
+                  </ion-buttons>
+                </ion-datetime>
+              </ion-accordion>
+            </ion-accordion-group>
+
+
+          </div>
+
+          <div class="calendar-content">
+            <ion-accordion-group #end_date>
+              <ion-accordion value="end">
+                <ion-item slot="header">
+                  <ion-label>{{timeCardEndDate?(timeCardEndDate | date:'MMM d, YY'):'Select End Date' }}</ion-label>
+                  <ion-note slot="end" id="datetimeValue"></ion-note>
+                </ion-item>
+                <ion-datetime presentation="date" id="datetime" slot="content" display-format="MMMM YY"
+                  [(ngModel)]="timeCardEndDate" #datetime2>
+                  <ion-buttons slot="buttons">
+                    <ion-button color="danger" (click)="datetime2.reset()">Reset</ion-button>
+                    &nbsp;
+                    <ion-button color="primary" (click)="toggleAccordion2()">Done</ion-button>
+                  </ion-buttons>
+                </ion-datetime>
+              </ion-accordion>
+            </ion-accordion-group>
+
+
+          </div>
+          <div>
+            <ion-button expand="block" size="small" (click)="routeTimeCard()">Time Card </ion-button>
+          </div>
+
+        </div>
+      </ion-card-subtitle>
+    </ion-card-header>
+
+
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+
+      <ion-card-subtitle>
+        <div class="">
+
+          <div class="calendar-content">
+            <ion-select [(ngModel)]="month" label="Month" label-placement="stacked">
+
+              <ion-select-option [value]="lgd.monthId"
+                *ngFor="let lgd of monthDropdown">{{lgd.monthName}}</ion-select-option>
+            </ion-select>
+
+          </div>
+
+          <div class="calendar-content">
+            <ion-select [(ngModel)]="year" label="Year" label-placement="stacked">
+
+              <ion-select-option [value]="lgd.year" *ngFor="let lgd of yearDropdown">{{lgd.year}}</ion-select-option>
+            </ion-select>
+          </div>
+          <div>
+            <ion-button expand="block" size="small" (click)="routePayslip()">Payslip </ion-button>
+          </div>
+
+        </div>
+      </ion-card-subtitle>
+    </ion-card-header>
+
+
+  </ion-card>
+  <!-- <div class="section-header" *ngIf="hasAttendanceApprove || hasRegularizationApprove"> -->
+  <div class="section-header">
+    <div class="section-header-text">{{'Incoming Application'}}</div>
+  </div>
+  <!-- <ion-card *ngIf="hasAttendanceApprove"> -->
+  <ion-card>
+    <ion-card-header>
+
+      <ion-card-subtitle>
+        <div class="notice-header d-justify">
+          <div style="margin-top: 12px; font-size: medium;">
+            <span>
+              {{'Incoming Leave Application'}}
+            </span>
+          </div>
+          <div>
+            <ion-button size="small" routerLink="/approval-leave"><ion-icon name="eye-outline"></ion-icon></ion-button>
+          </div>
+
+        </div>
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <hr>
+    <div *ngIf="(pendingLeaveApplication$ |async) as pendingLeave">
+      <ion-item>
+        <div class="full-width">
+          <ion-grid>
+            <div *ngFor="let leave of pendingLeave" class="attendance-table">
+              <ion-row>
+                <ion-col>Applied Date</ion-col>
+                <ion-col><b><span>{{leave.apply_date| date:'MMM d'}}</span></b></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Applied By</ion-col>
+                <ion-col><b><span>{{leave.employee_name}}</span></b></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Leave Type </ion-col>
+                <ion-col><b>{{leave.leave}}</b></ion-col>
+              </ion-row>
+
+              <ion-row *ngIf="leave.purpose && leave.purpose!=='null'">
+                <ion-col>Purpose</ion-col>
+                <ion-col>{{resizeLeaveContent(leave.purpose)}}</ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Date</ion-col>
+                <ion-col>
+                  <b><span>{{leave.start_date | date:'d MMM, yy'}}</span></b> &nbsp;
+                  <span *ngIf="leave.start_date !== leave.end_date"> to <b>{{leave.end_date | date:'d MMM,
+                      yy'}}</b></span>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Duration</ion-col>
+                <ion-col>
+                  {{leave.duration}}
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col></ion-col>
+                <ion-col>
+                  <ion-button color="medium" [routerLink]="['/leave-apply']"
+                    [queryParams]="{ approvals: leave.leave_application_id, action: 2 }"><ion-icon
+                      name="eye"></ion-icon>&nbsp;View</ion-button>
+                </ion-col>
+
+              </ion-row>
+
+            </div>
+          </ion-grid>
+        </div>
+
+      </ion-item>
+
+    </div>
+
+  </ion-card>
+  <!-- <ion-card *ngIf="hasRegularizationApprove"> -->
+  <ion-card>
+    <ion-card-header>
+
+      <ion-card-subtitle>
+        <div class="notice-header d-justify">
+          <div style="margin-top: 12px; font-size: medium;">
+            <span>
+              {{'Incoming Regularization'}}
+            </span>
+          </div>
+          <div>
+            <ion-button size="small" routerLink="/approval-regularization"><ion-icon
+                name="eye-outline"></ion-icon></ion-button>
+          </div>
+
+        </div>
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <hr>
+    <div *ngIf="(pendingRegularization$ |async) as pendingRegularization">
+      <ion-item>
+        <div class="full-width">
+          <ion-grid>
+            <div *ngFor="let regularization of pendingRegularization" class="attendance-table">
+              <ion-row>
+                <ion-col>Applied Date</ion-col>
+                <ion-col><b><span>{{regularization.apply_date}}</span></b></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Applied By</ion-col>
+                <ion-col><b><span>{{regularization.employee_name}}</span></b></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Attendance Date </ion-col>
+                <ion-col><b>{{regularization.attendance_date_formatted}}</b></ion-col>
+              </ion-row>
+
+              <ion-row *ngIf="regularization.reason && regularization.reason!=='null'">
+                <ion-col>Reason</ion-col>
+                <ion-col>{{resizeLeaveContent(regularization.reason)}}</ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col></ion-col>
+                <ion-col>
+                  <ion-button color="medium"
+                    [routerLink]="['/regularization-view/' + regularization.attendance_regularization_id+'']"><ion-icon
+                      name="eye"></ion-icon>&nbsp;View</ion-button>
+                </ion-col>
+              </ion-row>
+
+            </div>
+          </ion-grid>
+        </div>
+
+      </ion-item>
+
+    </div>
+
+  </ion-card>
+
+
+  <div class="section-header">
+    <div class="section-header-text">{{'Own Application'}}</div>
+  </div>
+  <ion-card>
+    <ion-card-header>
+
+      <ion-card-subtitle>
+        <div class="notice-header d-justify">
+          <div style="margin-top: 12px; font-size: medium;">
+            <span>
+              {{'Leave Application'}}
+            </span>
+          </div>
+          <div>
+            <ion-button size="small" (click)="routeLeaveApplications()"><ion-icon name="add"></ion-icon></ion-button>
+          </div>
+
+        </div>
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <hr>
+
+
+    <div *ngIf="(leaveApplication$ |async) as appliedLeave">
+      <ion-item>
+        <div class="full-width">
+          <ion-grid>
+            <div *ngFor="let leave of appliedLeave" class="attendance-table">
+              <ion-row>
+                <ion-col>Applied Date</ion-col>
+                <ion-col><b><span>{{leave.applied_date | date:'MMM d'}}</span></b></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Leave Type </ion-col>
+                <ion-col><b>{{leave.leave}}</b></ion-col>
+              </ion-row>
+
+              <ion-row *ngIf="leave.purpose ">
+                <ion-col>Purpose</ion-col>
+                <ion-col>{{resizeLeaveContent(leave.purpose)}}</ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Date</ion-col>
+                <ion-col>
+                  <b><span>{{leave.start_date | date:'d MMM, yy'}}</span></b> &nbsp;
+                  <span *ngIf="leave.start_date !== leave.end_date"> to <b>{{leave.end_date | date:'d MMM,
+                      yy'}}</b></span>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Duration</ion-col>
+                <ion-col>
+                  {{leave.duration}}
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Status</ion-col>
+                <ion-col><b><span>{{leave.leave_status_name}}</span><br></b>
+                  <span *ngIf="leave.leave_status_id < 4">{{getStatusWiseEmp(leave) }}</span></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col></ion-col>
+                <ion-col>
+                  <ion-button color="medium" [routerLink]="['/leave-apply']"
+                    [queryParams]="{ approvals: leave.leave_application_id, action: 2 }"><ion-icon
+                      name="eye"></ion-icon>&nbsp;View</ion-button>
+                </ion-col>
+
+              </ion-row>
+
+            </div>
+          </ion-grid>
+        </div>
+
+      </ion-item>
+
+      <ion-button size="small" style="width: 100%;" routerLink="/leave"><ion-icon
+          name="eye-outline"></ion-icon>&nbsp;View All</ion-button>
+
+    </div>
+
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+
+      <ion-card-subtitle>
+        <div class="notice-header d-justify">
+          <div style="margin-top: 12px; font-size: medium;">
+            <span>
+              {{'Attendance Regularization'}}
+            </span>
+          </div>
+          <div>
+            <ion-button size="small" [routerLink]="['/regularization-apply']"><ion-icon
+                name="add"></ion-icon></ion-button>
+          </div>
+
+        </div>
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <hr>
+
+
+    <div *ngIf="(appliedRegularization$ |async) as appliedRegularization">
+      <ion-item>
+        <div class="full-width">
+          <ion-grid>
+            <div *ngFor="let regularization of appliedRegularization" class="attendance-table">
+              <ion-row>
+                <ion-col>Applied Date</ion-col>
+                <ion-col><b><span>{{regularization.apply_date}}</span></b></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>Attendance Date </ion-col>
+                <ion-col><b>{{regularization.attendance_date_formatted}}</b></ion-col>
+              </ion-row>
+
+              <ion-row *ngIf="regularization.reason && regularization.reason!=='null'">
+                <ion-col>Reason</ion-col>
+                <ion-col>{{resizeLeaveContent(regularization.reason)}}</ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col>Status</ion-col>
+                <ion-col><b><span>{{regularization.ar_status_name}}</span><br></b>
+                  <span *ngIf="regularization.leave_status_id < 2">[{{regularization.approve_employee_name
+                    }}]</span></ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col></ion-col>
+                <ion-col>
+                  <ion-button color="medium"
+                    [routerLink]="['/regularization-view/' + regularization.attendance_regularization_id]"><ion-icon
+                      name="eye"></ion-icon>&nbsp;View</ion-button>
+                </ion-col>
+              </ion-row>
+            </div>
+          </ion-grid>
+        </div>
+
+      </ion-item>
+      <ion-button size="small" style="width: 100%;" routerLink="/regularization"><ion-icon
+          name="eye-outline"></ion-icon>&nbsp;View All</ion-button>
+    </div>
+
+  </ion-card>
+</ion-content>
+<ion-toast [isOpen]="isToastOpen" message="{{errMessage}}" position="top" cssClass="login_loast" positionAnchor="header"
+  message="Hello World!" [duration]="5000" (didDismiss)="setOpen(false)"></ion-toast>

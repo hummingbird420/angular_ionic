@@ -1,0 +1,46 @@
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+
+      <div *ngIf="(noticeData$ |async) as noticeList" class="notice-content">
+        <table>
+            <tbody>
+                <tr *ngFor="let notice of noticeList">
+                  <td><ion-icon name="notifications-circle" class="notice-icon"></ion-icon></td>
+                    <td class="first-column">
+
+                        <span
+                            class="notice-subject"><b>{{resizeNoticeSubject(notice.notice_subject)}}</b></span><br>
+                        <span
+                            class="notice-body">{{resizeNoticeContent(notice.notice_description)}}</span>
+                    </td>
+                    <td class="last-column">
+
+                        <span>{{ notice.issue_date | date:'MMM d'}}</span>
+                        <br>
+                        <a (click)="routeNoticeById(notice.notice_board_id)"
+                            >View</a>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+</ion-content>
+
+
+<ion-toast
+    [isOpen]="isToastOpen"
+    message="{{errMessage}}"
+    position="top"
+    cssClass="login_loast"
+    positionAnchor="header"
+    message="Hello World!"
+    [duration]="5000"
+    (didDismiss)="setOpen(false)"
+  ></ion-toast>

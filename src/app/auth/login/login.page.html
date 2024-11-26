@@ -1,0 +1,42 @@
+<ion-card>
+  <img src="/.../../../../assets/images/logo.svg">
+  <ion-card-content>
+    <form [formGroup]="loginform">
+    <div class="header-text">
+      <h1>Sign In</h1>
+    </div>
+    <div class="form-group">
+      <ion-label >Username</ion-label>
+      <div class="input-group">
+        <ion-icon name="person" class="icon-input" slot="end"></ion-icon>
+        <input placeholder="Enter username" required="true" type="text" formControlName="login_user">
+
+      </div>
+    </div>
+    <div class="form-group">
+      <ion-label >Password</ion-label>
+      <div class="input-group">
+        <ion-icon name="person" class="icon-input" slot="end"></ion-icon>
+        <input placeholder="**************" required="true" type="password" formControlName="password">
+
+      </div>
+    </div>
+
+    <ion-button (click)="loginUser()">Login</ion-button>
+    <div class="t-center">
+      <a [routerLink]="'/forget-password'">Forgot password?</a>
+    </div>
+
+  </form>
+  </ion-card-content>
+</ion-card>
+<ion-toast
+    [isOpen]="isToastOpen"
+    message="{{errMessage}}"
+    position="top"
+    cssClass="login_loast"
+    positionAnchor="header"
+    message="Hello World!"
+    [duration]="5000"
+    (didDismiss)="setOpen(false)"
+  ></ion-toast>

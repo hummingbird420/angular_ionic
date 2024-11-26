@@ -1,0 +1,96 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+:host(:not(.legacy-select)) {
+  min-height: 35px
+}
+
+.invalid-feedback {
+  color: red;
+}
+
+.ion-button-standard {
+  padding: 4px;
+}
+
+.menu-content-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+  /* Adjust the opacity as needed */
+  z-index: 10;
+  /* Adjust the z-index to ensure it covers the main content */
+}
+
+.item-inner {
+  border-color: #356289;
+}
+
+:host(.calendar-content ion-icon.select-icon) {
+  position: absolute;
+  right: 0;
+}
+
+hr {
+  height: 0.1em;
+  border-width: 0;
+  box-sizing: border-box;
+  border: 0;
+  height: 0;
+  border-top: 0.01em solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+
+}
+
+.d-justify {
+  display: flex;
+  justify-content: space-between;
+}
+
+ion-title {
+  font-size: 1rem;
+}
+
+ion-content {
+  --font-size: .8rem;
+  font-size: .8rem;
+}
+
+ion-grid {
+  font-size: .8rem;
+  --font-size: .8rem;
+}
+
+@media (prefers-color-scheme: dark) {
+
+  ion-card,
+  ion-card-subtitle {
+    --color: #fff;
+  }
+
+  .ion-color-medium {
+    --ion-color-contrast: #fff !important;
+  }
+}
